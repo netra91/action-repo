@@ -1,0 +1,20 @@
+name: Send Webhook on GitHub Events
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  send-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send webhook
+        run: |
+          curl -X POST ${{ secrets.WEBHOOK_URL }} \
+          -H "Content-Type: application/json" \
+          -d "$(jq -n \
+              --arg event "${{ github.event_name }}" \
+              --arg repo "${{ github.repository }}" \
+              --arg actor "${{ github.actor }}" \
+              --arg commit "${{ github.sha }}" \
+              '{event: $event, repo: $repo, actor: $actor, commit: $commit, timestamp: now | todate}')"
